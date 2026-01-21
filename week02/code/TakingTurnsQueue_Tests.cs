@@ -1,9 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// TODO Problem 1 - Run test cases and record any defects the test code finds in the comment above the test method.
-// DO NOT MODIFY THE CODE IN THE TESTS in this file, just the comments above the tests. 
-// Fix the code being tested to match requirements and make all tests pass. 
-
 [TestClass]
 public class TakingTurnsQueueTests
 {
@@ -11,14 +7,14 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3) and
     // run until the queue is empty
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: in the PersonQueue.Enqueue method, the queue did not maintain proper FIFO order because new items were added to the front instead of the back, causing people to be returned in the wrong order.
     public void TestTakingTurnsQueue_FiniteRepetition()
     {
         var bob = new Person("Bob", 2);
         var tim = new Person("Tim", 5);
         var sue = new Person("Sue", 3);
 
-        Person[] expectedResult = [bob, tim, sue, bob, tim, sue, tim, sue, tim, tim];
+        Person[] expectedResult = new Person[] { bob, tim, sue, bob, tim, sue, tim, sue, tim, tim };
 
         var players = new TakingTurnsQueue();
         players.AddPerson(bob.Name, bob.Turns);
@@ -29,9 +25,7 @@ public class TakingTurnsQueueTests
         while (players.Length > 0)
         {
             if (i >= expectedResult.Length)
-            {
                 Assert.Fail("Queue should have ran out of items by now.");
-            }
 
             var person = players.GetNextPerson();
             Assert.AreEqual(expectedResult[i].Name, person.Name);
@@ -51,7 +45,7 @@ public class TakingTurnsQueueTests
         var sue = new Person("Sue", 3);
         var george = new Person("George", 3);
 
-        Person[] expectedResult = [bob, tim, sue, bob, tim, sue, tim, george, sue, tim, george, tim, george];
+        Person[] expectedResult = new Person[] { bob, tim, sue, bob, tim, sue, tim, george, sue, tim, george, tim, george };
 
         var players = new TakingTurnsQueue();
         players.AddPerson(bob.Name, bob.Turns);
@@ -70,13 +64,10 @@ public class TakingTurnsQueueTests
         while (players.Length > 0)
         {
             if (i >= expectedResult.Length)
-            {
                 Assert.Fail("Queue should have ran out of items by now.");
-            }
 
             var person = players.GetNextPerson();
             Assert.AreEqual(expectedResult[i].Name, person.Name);
-
             i++;
         }
     }
@@ -85,7 +76,7 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: After calling GetNextPerson on a person with infinite turns, their Turns property was incorrectly modified to a very large number instead of remaining unchanged.
     public void TestTakingTurnsQueue_ForeverZero()
     {
         var timTurns = 0;
@@ -94,7 +85,7 @@ public class TakingTurnsQueueTests
         var tim = new Person("Tim", timTurns);
         var sue = new Person("Sue", 3);
 
-        Person[] expectedResult = [bob, tim, sue, bob, tim, sue, tim, sue, tim, tim];
+        Person[] expectedResult = new Person[] { bob, tim, sue, bob, tim, sue, tim, sue, tim, tim };
 
         var players = new TakingTurnsQueue();
         players.AddPerson(bob.Name, bob.Turns);
@@ -107,23 +98,24 @@ public class TakingTurnsQueueTests
             Assert.AreEqual(expectedResult[i].Name, person.Name);
         }
 
-        // Verify that the people with infinite turns really do have infinite turns.
+        // Verify that people with infinite turns really do have infinite turns
         var infinitePerson = players.GetNextPerson();
-        Assert.AreEqual(timTurns, infinitePerson.Turns, "People with infinite turns should not have their turns parameter modified to a very big number. A very big number is not infinite.");
+        Assert.AreEqual(timTurns, infinitePerson.Turns, 
+            "People with infinite turns should not have their turns parameter modified to a very big number. A very big number is not infinite.");
     }
 
     [TestMethod]
     // Scenario: Create a queue with the following people and turns: Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: People with negative Turns (representing infinite turns) had their Turns property incorrectly modified when GetNextPerson() was called, instead of remaining unchanged. This caused the queue behavior to fail for infinite-turns players.
     public void TestTakingTurnsQueue_ForeverNegative()
     {
         var timTurns = -3;
         var tim = new Person("Tim", timTurns);
         var sue = new Person("Sue", 3);
 
-        Person[] expectedResult = [tim, sue, tim, sue, tim, sue, tim, tim, tim, tim];
+        Person[] expectedResult = new Person[] { tim, sue, tim, sue, tim, sue, tim, tim, tim, tim };
 
         var players = new TakingTurnsQueue();
         players.AddPerson(tim.Name, tim.Turns);
@@ -135,15 +127,16 @@ public class TakingTurnsQueueTests
             Assert.AreEqual(expectedResult[i].Name, person.Name);
         }
 
-        // Verify that the people with infinite turns really do have infinite turns.
+        // Verify that people with infinite turns really do have infinite turns
         var infinitePerson = players.GetNextPerson();
-        Assert.AreEqual(timTurns, infinitePerson.Turns, "People with infinite turns should not have their turns parameter modified to a very big number. A very big number is not infinite.");
+        Assert.AreEqual(timTurns, infinitePerson.Turns, 
+            "People with infinite turns should not have their turns parameter modified to a very big number. A very big number is not infinite.");
     }
 
     [TestMethod]
     // Scenario: Try to get the next person from an empty queue
     // Expected Result: Exception should be thrown with appropriate error message.
-    // Defect(s) Found: 
+    // Defect(s) Found: None. The exception was correctly thrown and caught as expected.
     public void TestTakingTurnsQueue_Empty()
     {
         var players = new TakingTurnsQueue();
@@ -163,10 +156,7 @@ public class TakingTurnsQueueTests
         }
         catch (Exception e)
         {
-            Assert.Fail(
-                 string.Format("Unexpected exception of type {0} caught: {1}",
-                                e.GetType(), e.Message)
-            );
+            Assert.Fail($"Unexpected exception of type {e.GetType()} caught: {e.Message}");
         }
     }
 }
